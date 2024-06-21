@@ -15,3 +15,8 @@ export const OptionPropType = {
   address: PropTypes.string.isRequired,
   pincode: PropTypes.string.isRequired,
 };
+
+export const Keys = {
+  ArrowUp: "ArrowUp",
+  ArrowDown: "ArrowDown",
+};
