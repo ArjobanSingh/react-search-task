@@ -117,7 +117,6 @@ export default function Search({ items }) {
 
   const handleKeyDown = (e) => {
     if (!areOptionsVisible) return;
-    // on keyboard event, cancel any pending mouse debounce events
     switch (e.key) {
       case Keys.ArrowUp:
       case Keys.ArrowDown:

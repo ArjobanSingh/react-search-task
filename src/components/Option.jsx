@@ -42,7 +42,7 @@ function Option({ data, idx, searchText, isActive, goToSpecificIdx }) {
       onMouseLeave={handleMouseLeave}
       ref={optionRef}
       className={cn(
-        "flex flex-col gap-2 border-b border-gray-200 px-4 py-2 hover:cursor-pointer",
+        "flex cursor-pointer flex-col gap-2 border-b border-gray-200 px-4 py-2",
         {
           "bg-yellow-100": isActive,
         },
