@@ -1,12 +1,12 @@
-import { memo, useRef, useLayoutEffect } from "react";
+import { memo, useRef, useLayoutEffect, useMemo } from "react";
 import PropTypes from "prop-types";
+import Highlighter from "react-highlight-words";
 
 import { FIELD_TYPE, OptionPropType } from "../utils/constants";
 import { cn, searchHandlers } from "../utils/helpers";
 
-// TODO: highlight logic
 function Option({ data, idx, searchText, isActive, goToSpecificIdx }) {
-  const { id, name, items, address } = data;
+  const { id, name, items, address, pincode } = data;
   const optionRef = useRef();
 
   useLayoutEffect(() => {
@@ -18,7 +18,10 @@ function Option({ data, idx, searchText, isActive, goToSpecificIdx }) {
     }
   }, [isActive]);
 
-  const itemsIncludesText = searchHandlers[FIELD_TYPE.ITEMS];
+  const itemsIncludesText = useMemo(() => {
+    const includesText = searchHandlers[FIELD_TYPE.ITEMS];
+    return includesText(items, searchText);
+  }, [items, searchText]);
 
   const handleMouseMove = () => {
     if (isActive) return;
@@ -26,12 +29,13 @@ function Option({ data, idx, searchText, isActive, goToSpecificIdx }) {
   };
 
   const handleMouseLeave = () => {
-    // Occurs when the cursor stays still but the list auto-scrolls due to keyboard navigation,
+    // This handles when the cursor stays still but the list auto-scrolls due to keyboard navigation,
     // causing the cursor to leave this item, without actually moving.
     if (!isActive) return;
     goToSpecificIdx(-1);
   };
 
+  const searchWords = [searchText];
   return (
     <li
       onMouseMove={handleMouseMove}
@@ -45,18 +49,30 @@ function Option({ data, idx, searchText, isActive, goToSpecificIdx }) {
       )}
     >
       <div>
-        <div className="font-medium">{id}</div>
-        <div className="text-sm italic text-gray-600">{name}</div>
+        <div className="font-medium">
+          <Highlighter searchWords={searchWords} textToHighlight={id} />
+        </div>
+        <div className="text-sm italic text-gray-600">
+          <Highlighter searchWords={searchWords} textToHighlight={name} />
+        </div>
       </div>
 
-      {itemsIncludesText(items, searchText) && (
+      {itemsIncludesText && (
         <ul className="list-inside list-disc border-b border-t border-gray-200 py-1 marker:text-sky-400">
           <li className="text-sm text-gray-600">
             {`"${searchText}" found in items`}
           </li>
         </ul>
       )}
-      <div className="text-sm text-gray-500">{address}</div>
+      <div>
+        <div className="text-sm text-gray-500">
+          <Highlighter searchWords={searchWords} textToHighlight={address} />
+        </div>
+        <div className="text-xs text-gray-500">
+          Pin code -{" "}
+          <Highlighter searchWords={searchWords} textToHighlight={pincode} />
+        </div>
+      </div>
     </li>
   );
 }

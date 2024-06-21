@@ -3,8 +3,9 @@ import PropTypes from "prop-types";
 import debounce from "lodash.debounce";
 
 import { cn, searchHandlers } from "../utils/helpers";
-import Option from "./Option";
 import { Keys, OptionPropType } from "../utils/constants";
+import { useDidUpdate } from "../hooks/useDidUpdate";
+import Option from "./Option";
 
 const initialState = {
   searchText: "",
@@ -72,12 +73,24 @@ export default function Search({ items }) {
   // Debounced search update for better performance
   const onSearchChangeDebounced = debounce(onSearchChange, 300);
 
+  const goToSpecificIdx = useCallback((idx) => {
+    dispatch({
+      type: ActionTypes.MOVE_ACTIVE_IDX,
+      payload: { specificIdx: idx },
+    });
+  }, []);
+
+  useDidUpdate(() => {
+    // on items change, reset the active index
+    goToSpecificIdx(-1);
+  }, [items, goToSpecificIdx]);
+
   useEffect(() => {
     // if keyboard is not in focus, focus it and dispatch the keyboard event
     const onDocumentKeydown = (e) => {
       if (document.activeElement === inputRef.current) return;
-      inputRef.current.focus();
-      inputRef.current.dispatchEvent(
+      inputRef.current.focus?.();
+      inputRef.current.dispatchEvent?.(
         new KeyboardEvent("keydown", { key: e.key, bubbles: true }),
       );
     };
@@ -101,13 +114,6 @@ export default function Search({ items }) {
   }, [searchText, items]);
 
   const areOptionsVisible = !!searchText.trim();
-
-  const goToSpecificIdx = useCallback((idx) => {
-    dispatch({
-      type: ActionTypes.MOVE_ACTIVE_IDX,
-      payload: { specificIdx: idx },
-    });
-  }, []);
 
   const handleKeyDown = (e) => {
     if (!areOptionsVisible) return;
