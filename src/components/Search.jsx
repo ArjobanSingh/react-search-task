@@ -1,20 +1,22 @@
 import { useReducer, useRef, useMemo, useCallback, useEffect } from "react";
 import PropTypes from "prop-types";
-import debounce from "lodash.debounce";
 
 import { cn, searchHandlers } from "../utils/helpers";
 import { Keys, OptionPropType } from "../utils/constants";
 import { useDidUpdate } from "../hooks/useDidUpdate";
 import Option from "./Option";
+import { useDebounceCallback } from "../hooks/useDebounceCallback";
 
 const initialState = {
   searchText: "",
   activeIndex: -1,
+  isMouseMovementEnabled: true,
 };
 
 const ActionTypes = {
   SET_SEARCH: "SET_SEARCH",
   MOVE_ACTIVE_IDX: "MOVE_ACTIVE_IDX",
+  ENABLE_MOUSE_MOVEMENT: "ENABLE_MOUSE_MOVEMENT",
 };
 
 const reducers = {
@@ -48,11 +50,19 @@ const reducers = {
       default:
         break;
     }
+
+    // disable mouse movement on keyboard event
+    // will be re-enabled after threshold time
     return {
       ...state,
       activeIndex: newIdx,
+      isMouseMovementEnabled: false,
     };
   },
+  [ActionTypes.ENABLE_MOUSE_MOVEMENT]: (state) => ({
+    ...state,
+    isMouseMovementEnabled: true,
+  }),
 };
 
 function reducer(state, action) {
@@ -62,16 +72,16 @@ function reducer(state, action) {
 
 export default function Search({ items }) {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { searchText, activeIndex } = state;
+  const { searchText, activeIndex, isMouseMovementEnabled } = state;
 
   const inputRef = useRef();
-  // we just need the search value, and we can keep the search as uncontrolled
-  const onSearchChange = useCallback((e) => {
-    dispatch({ type: ActionTypes.SET_SEARCH, payload: e.target.value });
-  }, []);
 
   // Debounced search update for better performance
-  const onSearchChangeDebounced = debounce(onSearchChange, 300);
+  const onSearchChangeDebounced = useDebounceCallback(
+    (e) => dispatch({ type: ActionTypes.SET_SEARCH, payload: e.target.value }),
+    300,
+    [],
+  );
 
   const goToSpecificIdx = useCallback((idx) => {
     dispatch({
@@ -84,6 +94,14 @@ export default function Search({ items }) {
     // on items change, reset the active index
     goToSpecificIdx(-1);
   }, [items, goToSpecificIdx]);
+
+  const goToIdxWithLessPriority = useCallback(
+    (idx) => {
+      if (!isMouseMovementEnabled) return;
+      goToSpecificIdx(idx);
+    },
+    [isMouseMovementEnabled, goToSpecificIdx],
+  );
 
   useEffect(() => {
     // if keyboard is not in focus, focus it and dispatch the keyboard event
@@ -115,6 +133,12 @@ export default function Search({ items }) {
 
   const areOptionsVisible = !!searchText.trim();
 
+  const enableMouseMovement = useDebounceCallback(
+    () => dispatch({ type: ActionTypes.ENABLE_MOUSE_MOVEMENT }),
+    300,
+    [],
+  );
+
   const handleKeyDown = (e) => {
     if (!areOptionsVisible) return;
     switch (e.key) {
@@ -128,6 +152,8 @@ export default function Search({ items }) {
             key: e.key,
           },
         });
+        // enable once keyboard movement is off for certain time.(using debounce)
+        enableMouseMovement();
         break;
       default:
         break;
@@ -158,7 +184,7 @@ export default function Search({ items }) {
                 data={item}
                 searchText={searchText}
                 isActive={activeIndex === idx}
-                goToSpecificIdx={goToSpecificIdx}
+                goToIdxWithLessPriority={goToIdxWithLessPriority}
               />
             ))}
           </ul>

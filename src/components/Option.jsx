@@ -5,7 +5,7 @@ import Highlighter from "react-highlight-words";
 import { FIELD_TYPE, OptionPropType } from "../utils/constants";
 import { cn, searchHandlers } from "../utils/helpers";
 
-function Option({ data, idx, searchText, isActive, goToSpecificIdx }) {
+function Option({ data, idx, searchText, isActive, goToIdxWithLessPriority }) {
   const { id, name, items, address, pincode } = data;
   const optionRef = useRef();
 
@@ -25,14 +25,14 @@ function Option({ data, idx, searchText, isActive, goToSpecificIdx }) {
 
   const handleMouseMove = () => {
     if (isActive) return;
-    goToSpecificIdx(idx);
+    goToIdxWithLessPriority(idx);
   };
 
   const handleMouseLeave = () => {
     // This handles when the cursor stays still but the list auto-scrolls due to keyboard navigation,
     // causing the cursor to leave this item, without actually moving.
     if (!isActive) return;
-    goToSpecificIdx(-1);
+    goToIdxWithLessPriority(-1);
   };
 
   const searchWords = [searchText];
@@ -82,7 +82,7 @@ Option.propTypes = {
   idx: PropTypes.number.isRequired,
   searchText: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
-  goToSpecificIdx: PropTypes.func.isRequired,
+  goToIdxWithLessPriority: PropTypes.func.isRequired,
 };
 
 const MemoOption = memo(Option);
