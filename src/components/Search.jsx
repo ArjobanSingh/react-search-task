@@ -120,8 +120,8 @@ export default function Search({ items }) {
   }, []);
 
   const filteredItems = useMemo(() => {
-    const lowercaseText = searchText.trim().toLowerCase();
-    if (!lowercaseText) return [];
+    if (!searchText.trim()) return [];
+    const lowercaseText = searchText.toLowerCase();
 
     return items.filter((itemObj) =>
       Object.entries(itemObj).some(([fieldKey, fieldValue]) => {
@@ -161,7 +161,7 @@ export default function Search({ items }) {
   };
 
   return (
-    <div className="flex w-80 flex-col rounded border border-gray-500">
+    <div className="flex flex-col border border-gray-500 rounded w-80">
       <input
         autoFocus
         ref={inputRef}
@@ -176,7 +176,7 @@ export default function Search({ items }) {
 
       {areOptionsVisible &&
         (filteredItems.length ? (
-          <ul className="max-h-80 overflow-y-auto">
+          <ul className="overflow-y-auto max-h-80">
             {filteredItems.map((item, idx) => (
               <Option
                 idx={idx}
@@ -189,7 +189,7 @@ export default function Search({ items }) {
             ))}
           </ul>
         ) : (
-          <div className="p-5 text-center text-base">No items</div>
+          <div className="p-5 text-base text-center">No items</div>
         ))}
     </div>
   );

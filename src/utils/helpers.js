@@ -12,7 +12,6 @@ export const searchHandlers = {
     valueItems.some((item) => item.toLowerCase().includes(searchText)),
 };
 
-export const createRegex = ({ text, flags }) => {
-  const sanitizedText = text.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
-  return new RegExp(sanitizedText, flags);
+export const escapeRegexFn = (text) => {
+  return text.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1");
 };

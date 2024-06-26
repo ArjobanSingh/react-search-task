@@ -1,7 +1,7 @@
 import { memo, useRef, useLayoutEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-import Highlighter from "react-highlight-words";
 
+import Highlighter from "./Highlighter";
 import { FIELD_TYPE, OptionPropType } from "../utils/constants";
 import { cn, searchHandlers } from "../utils/helpers";
 
@@ -35,7 +35,6 @@ function Option({ data, idx, searchText, isActive, goToIdxWithLessPriority }) {
     goToIdxWithLessPriority(-1);
   };
 
-  const searchWords = [searchText];
   return (
     <li
       onMouseMove={handleMouseMove}
@@ -50,15 +49,15 @@ function Option({ data, idx, searchText, isActive, goToIdxWithLessPriority }) {
     >
       <div>
         <div className="font-medium">
-          <Highlighter searchWords={searchWords} textToHighlight={id} />
+          <Highlighter searchText={searchText} textToHighlight={id} />
         </div>
         <div className="text-sm italic text-gray-600">
-          <Highlighter searchWords={searchWords} textToHighlight={name} />
+          <Highlighter searchText={searchText} textToHighlight={name} />
         </div>
       </div>
 
       {itemsIncludesText && (
-        <ul className="list-inside list-disc border-b border-t border-gray-200 py-1 marker:text-sky-400">
+        <ul className="py-1 list-disc list-inside border-t border-b border-gray-200 marker:text-sky-400">
           <li className="text-sm text-gray-600">
             {`"${searchText}" found in items`}
           </li>
@@ -66,11 +65,11 @@ function Option({ data, idx, searchText, isActive, goToIdxWithLessPriority }) {
       )}
       <div>
         <div className="text-sm text-gray-500">
-          <Highlighter searchWords={searchWords} textToHighlight={address} />
+          <Highlighter searchText={searchText} textToHighlight={address} />
         </div>
         <div className="text-xs text-gray-500">
           Pin code -{" "}
-          <Highlighter searchWords={searchWords} textToHighlight={pincode} />
+          <Highlighter searchText={searchText} textToHighlight={pincode} />
         </div>
       </div>
     </li>
